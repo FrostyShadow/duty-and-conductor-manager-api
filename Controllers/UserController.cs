@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DutyAndConductorManager.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]/[action]")]
+[Route("[controller]/[action]")]
 public class UserController : ControllerBase
 {
     private IUserService _userService;
