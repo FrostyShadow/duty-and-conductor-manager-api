@@ -1,9 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using DutyAndConductorManager.Api.Contexts;
 using DutyAndConductorManager.Api.Entities;
 using DutyAndConductorManager.Api.Helpers;
 using DutyAndConductorManager.Api.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -18,21 +21,19 @@ public interface IUserService
 
 public class UserService : IUserService
 {
-    private IList<User> _users = new List<User>
-    {
-        new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test123" }
-    };
 
     private readonly AppSettings _appSettings;
+    private readonly ConductorDb _context;
 
-    public UserService(IOptions<AppSettings> appsettings)
+    public UserService(IOptions<AppSettings> appsettings, ConductorDb context)
     {
         _appSettings = appsettings.Value;
+        _context = context;
     }
 
     public async Task<AuthenticateResponse> Authenticate(AuthenticateRequest model)
     {
-        var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+        var user = await _context.Users.SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == HashPassword(model.Password));
 
         if (user == null) return null;
 
@@ -41,9 +42,9 @@ public class UserService : IUserService
         return new AuthenticateResponse(user, token);
     }
 
-    public async Task<IEnumerable<User>> GetAll() => _users;
+    public async Task<IEnumerable<User>> GetAll() => _context.Users.ToList();
 
-    public async Task<User> GetById(int id) => _users.FirstOrDefault(x => x.Id == id);
+    public async Task<User> GetById(int id) => await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
 
     private string GenerateJwtToken(User user)
     {
@@ -57,5 +58,20 @@ public class UserService : IUserService
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
+    }
+
+    private string HashPassword(string rawPassword)
+    {
+        var clearBytes = Encoding.Unicode.GetBytes(rawPassword);
+        using var encryptor = Aes.Create();
+        var pdb = new Rfc2898DeriveBytes(_appSettings.ApiSecret,
+            new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+        encryptor.Key = pdb.GetBytes(32);
+        encryptor.IV = pdb.GetBytes(16);
+        using var ms = new MemoryStream();
+        using var cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write);
+        cs.Write(clearBytes, 0, clearBytes.Length);
+        cs.Close();
+        return Convert.ToBase64String(ms.ToArray());
     }
 }

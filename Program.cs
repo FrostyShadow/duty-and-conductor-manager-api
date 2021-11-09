@@ -1,6 +1,8 @@
 using System.Reflection;
+using DutyAndConductorManager.Api.Contexts;
 using DutyAndConductorManager.Api.Helpers;
 using DutyAndConductorManager.Api.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -30,7 +32,12 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "Duty and Conductor Manager Api", Version = "v1" });
 });
-
+builder.Services.AddDbContext<ConductorDb>(config =>
+{
+    config.UseSqlServer(builder.Configuration.GetConnectionString("ConductorDb"));
+    if (builder.Environment.IsDevelopment())
+        config.EnableSensitiveDataLogging(true);
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
