@@ -25,7 +25,7 @@ public class UserService : IUserService
     private readonly AppSettings _appSettings;
     private readonly ConductorDb _context;
 
-    public UserService(IOptions<AppSettings> appsettings, ConductorDb context)
+    public UserService(IOptionsSnapshot<AppSettings> appsettings, ConductorDb context)
     {
         _appSettings = appsettings.Value;
         _context = context;
@@ -33,7 +33,7 @@ public class UserService : IUserService
 
     public async Task<AuthenticateResponse> Authenticate(AuthenticateRequest model)
     {
-        var user = await _context.Users.SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == HashPassword(model.Password));
+        var user = await _context.Users.Include(e => e.Role).SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == HashPassword(model.Password));
 
         if (user == null) return null;
 
@@ -42,9 +42,9 @@ public class UserService : IUserService
         return new AuthenticateResponse(user, token);
     }
 
-    public async Task<IEnumerable<User>> GetAll() => _context.Users.ToList();
+    public async Task<IEnumerable<User>> GetAll() => await _context.Users.Include(e => e.Role).ToListAsync();
 
-    public async Task<User> GetById(int id) => await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+    public async Task<User> GetById(int id) => await _context.Users.Include(e => e.Role).FirstOrDefaultAsync(x => x.Id == id);
 
     private string GenerateJwtToken(User user)
     {
