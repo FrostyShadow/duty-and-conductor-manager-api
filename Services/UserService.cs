@@ -9,6 +9,7 @@ using DutyAndConductorManager.Api.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SecurityToken = DutyAndConductorManager.Api.Entities.SecurityToken;
 
 namespace DutyAndConductorManager.Api.Services;
 
@@ -16,7 +17,8 @@ public interface IUserService
 {
     Task<AuthenticateResponse> Authenticate(AuthenticateRequest model);
     Task<IEnumerable<User>> GetAll();
-    Task<User> GetById(int id);
+    Task<User> GetByIdAsync(int id);
+    Task<AddUserResponse> AddUser(AddUserRequest model);
 }
 
 public class UserService : IUserService
@@ -44,7 +46,41 @@ public class UserService : IUserService
 
     public async Task<IEnumerable<User>> GetAll() => await _context.Users.Include(e => e.Role).ToListAsync();
 
-    public async Task<User> GetById(int id) => await _context.Users.Include(e => e.Role).FirstOrDefaultAsync(x => x.Id == id);
+    public async Task<User> GetByIdAsync(int id) => await _context.Users.Include(e => e.Role).FirstOrDefaultAsync(x => x.Id == id);
+
+    public async Task<AddUserResponse> AddUser(AddUserRequest model)
+    {
+        if(await _context.Users.AnyAsync(x => x.Username == model.Username || x.Email == model.Email))
+            return null;
+
+        var user = await _context.Users.AddAsync(new User
+        {
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            Username = model.Username,
+            Email = model.Email,
+            RoleId = model.RoleId,
+            BirthDate = model.BirthDate,
+            IsTrained = model.IsTrained,
+            PhoneNumber = model.PhoneNumber
+        });
+
+        await _context.SaveChangesAsync();
+
+        var securityToken = new SecurityToken
+        {
+            CreatedDateTime = DateTime.Now,
+            UserId = user.Entity.Id,
+            Token = Guid.NewGuid()
+        };
+
+        await _context.SecurityTokens.AddAsync(securityToken);
+        await _context.SaveChangesAsync();
+
+        return new AddUserResponse(user.Entity.Id);
+    }
+
+    private User GetById(int id) => _context.Users.FirstOrDefault(x => x.Id == id);
 
     private string GenerateJwtToken(User user)
     {
@@ -52,7 +88,7 @@ public class UserService : IUserService
         var key = Encoding.ASCII.GetBytes(_appSettings.ApiSecret);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
+            Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()), new Claim("role", user.Role.Name) }),
             Expires = DateTime.UtcNow.AddDays(7),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };

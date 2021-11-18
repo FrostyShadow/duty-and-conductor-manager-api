@@ -15,6 +15,11 @@ public class ConductorDb : DbContext
             .WithMany(e => e.Users)
             .HasForeignKey(e => e.RoleId);
 
+        modelBuilder.Entity<SecurityToken>()
+            .HasOne<User>(e => e.User)
+            .WithMany(e => e.SecurityTokens)
+            .HasForeignKey(e => e.UserId);
+
         // Static data
         modelBuilder.Entity<Role>()
             .HasData(new List<Role>
@@ -39,4 +44,5 @@ public class ConductorDb : DbContext
 
     public DbSet<User> Users {get;set;}
     public DbSet<Role> Roles {get;set;}
+    public DbSet<SecurityToken> SecurityTokens {get;set;}
 }
