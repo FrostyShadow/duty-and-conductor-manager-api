@@ -32,4 +32,15 @@ public class UserController : ControllerBase
         var users = await _userService.GetAll();
         return Ok(users);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> AddUser(AddUserRequest model)
+    {
+        var response = await _userService.AddUser(model);
+
+        if(response == null)
+            return BadRequest(new { message = "Username already in use" });
+
+        return Ok(response);
+    }
 }

@@ -77,6 +77,10 @@ public class UserService : IUserService
         await _context.SecurityTokens.AddAsync(securityToken);
         await _context.SaveChangesAsync();
 
+        var securityUrl = $"http://localhost:5284/activate/{user.Entity.Id}/{securityToken.Token}";
+
+        Console.WriteLine(securityUrl);
+
         return new AddUserResponse(user.Entity.Id);
     }
 
