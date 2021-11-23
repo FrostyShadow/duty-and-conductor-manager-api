@@ -58,6 +58,7 @@ public class UserService : IUserService
             FirstName = model.FirstName,
             LastName = model.LastName,
             Username = model.Username,
+            Password = "empty",
             Email = model.Email,
             RoleId = model.RoleId,
             BirthDate = model.BirthDate,

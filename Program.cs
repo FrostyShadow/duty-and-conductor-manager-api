@@ -40,6 +40,7 @@ builder.Services.AddDbContext<ConductorDb>(config =>
         config.EnableSensitiveDataLogging(true);
 }, ServiceLifetime.Transient);
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IRoleService, RoleService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
