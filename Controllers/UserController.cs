@@ -16,7 +16,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Authenticate(AuthenticateRequest model)
+    public async Task<IActionResult> Authenticate([FromBody] AuthenticateRequest model)
     {
         var response = await _userService.Authenticate(model);
 
@@ -24,6 +24,28 @@ public class UserController : ControllerBase
             return BadRequest(new { message = "Username or password is incorrect" });
 
         return Ok(response);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Activate([FromBody] ActivateRequest model)
+    {
+        var response = await _userService.Activate(model);
+
+        if (!response.IsSuccess)
+            return BadRequest(new { message = response.ErrorMessage });
+
+        return Ok(response.SetPasswordToken);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SetPassword([FromBody] SetPasswordRequest model)
+    {
+        var response = await _userService.SetPassword(model);
+
+        if (!response.IsSuccess)
+            return BadRequest(new { message = response.ErrorMessage });
+
+        return Ok(true);
     }
 
     [HttpGet]
@@ -34,7 +56,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddUser(AddUserRequest model)
+    public async Task<IActionResult> AddUser([FromBody] AddUserRequest model)
     {
         var response = await _userService.AddUser(model);
 

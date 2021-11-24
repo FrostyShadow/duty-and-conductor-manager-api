@@ -6,6 +6,9 @@ public class SecurityToken
     public int UserId {get;set;}
     public DateTime CreatedDateTime {get;set;}
     public Guid Token {get;set;}
+    public int SecurityTokenTypeId {get;set;}
 
     public User User {get;set;}
+    public SecurityTokenType SecurityTokenType {get;set;}
+
 }

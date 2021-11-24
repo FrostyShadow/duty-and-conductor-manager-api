@@ -20,6 +20,15 @@ public class ConductorDb : DbContext
             .WithMany(e => e.SecurityTokens)
             .HasForeignKey(e => e.UserId);
 
+        modelBuilder.Entity<SecurityToken>()
+            .HasOne<SecurityTokenType>(e => e.SecurityTokenType)
+            .WithMany(e => e.SecurityTokens)
+            .HasForeignKey(e => e.SecurityTokenTypeId);
+
+        modelBuilder.Entity<SecurityToken>()
+            .Property(e => e.SecurityTokenTypeId)
+            .HasDefaultValue(1);
+
         // Static data
         modelBuilder.Entity<Role>()
             .HasData(new List<Role>
@@ -40,9 +49,25 @@ public class ConductorDb : DbContext
                     Name = "Conductor"
                 }
             });
+
+        modelBuilder.Entity<SecurityTokenType>()
+            .HasData(new List<SecurityTokenType>
+            {
+                new SecurityTokenType
+                {
+                    Id = 1,
+                    Name = "ActivationToken"
+                },
+                new SecurityTokenType
+                {
+                    Id = 2,
+                    Name = "PasswordChangeToken"
+                }
+            });
     }
 
     public DbSet<User> Users {get;set;}
     public DbSet<Role> Roles {get;set;}
     public DbSet<SecurityToken> SecurityTokens {get;set;}
+    public DbSet<SecurityTokenType> SecurityTokenTypes {get;set;}
 }

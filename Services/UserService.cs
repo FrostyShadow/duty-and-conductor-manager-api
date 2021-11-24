@@ -16,6 +16,8 @@ namespace DutyAndConductorManager.Api.Services;
 public interface IUserService
 {
     Task<AuthenticateResponse> Authenticate(AuthenticateRequest model);
+    Task<ActivateResponse> Activate(ActivateRequest model);
+    Task<SetPasswordResponse> SetPassword(SetPasswordRequest model);
     Task<IEnumerable<User>> GetAll();
     Task<User> GetByIdAsync(int id);
     Task<AddUserResponse> AddUser(AddUserRequest model);
@@ -44,10 +46,62 @@ public class UserService : IUserService
         return new AuthenticateResponse(user, token);
     }
 
+    public async Task<ActivateResponse> Activate(ActivateRequest model)
+    {
+        var securityToken = await _context.SecurityTokens.FirstOrDefaultAsync(x => x.UserId == model.Id && x.Token == model.Token);
+
+        if (securityToken == null) 
+            return new ActivateResponse(false, "Activation token is incorrect");
+
+        if (securityToken.CreatedDateTime.AddHours(24) < DateTime.UtcNow)
+            return new ActivateResponse(false, "Activation token is expired");
+
+        var user = GetById(model.Id);
+
+        if (user.IsActive)
+            return new ActivateResponse(false, "Account is already active");
+
+        user.IsActive = true;
+
+        var setPasswordToken = new SecurityToken
+        {
+            CreatedDateTime = DateTime.UtcNow,
+            Token = new Guid(),
+            SecurityTokenTypeId = 2,
+            UserId = user.Id
+        };
+
+        await _context.SecurityTokens.AddAsync(setPasswordToken);
+
+        await _context.SaveChangesAsync();
+
+        return new ActivateResponse(true, setPasswordToken.Token);
+    }
+
+    public async Task<SetPasswordResponse> SetPassword(SetPasswordRequest model)
+    {
+        var securityToken = await _context.SecurityTokens.FirstOrDefaultAsync(x => x.UserId == model.Id && x.Token == model.Token);
+
+        if (securityToken == null) 
+            return new SetPasswordResponse(false, "Set password token is incorrect");
+
+        if (securityToken.CreatedDateTime.AddHours(24) < DateTime.UtcNow)
+            return new SetPasswordResponse(false, "Set password token is expired");
+
+        var user = GetById(model.Id);
+
+        user.Password = HashPassword(model.Password);
+
+        await _context.SaveChangesAsync();
+
+        return new SetPasswordResponse(true);
+    }
+
     public async Task<IEnumerable<User>> GetAll() => await _context.Users.Include(e => e.Role).ToListAsync();
 
     public async Task<User> GetByIdAsync(int id) => await _context.Users.Include(e => e.Role).FirstOrDefaultAsync(x => x.Id == id);
 
+    // TODO: Add mail server support to send activation links via email
     public async Task<AddUserResponse> AddUser(AddUserRequest model)
     {
         if(await _context.Users.AnyAsync(x => x.Username == model.Username || x.Email == model.Email))
