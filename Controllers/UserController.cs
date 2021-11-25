@@ -20,8 +20,8 @@ public class UserController : ControllerBase
     {
         var response = await _userService.Authenticate(model);
 
-        if(response == null)
-            return BadRequest(new { message = "Username or password is incorrect" });
+        if(!response.IsSuccess)
+            return BadRequest(new { message = response.ErrorMessage });
 
         return Ok(response);
     }
@@ -30,6 +30,25 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Activate([FromBody] ActivateRequest model)
     {
         var response = await _userService.Activate(model);
+
+        if (!response.IsSuccess)
+            return BadRequest(new { message = response.ErrorMessage });
+
+        return Ok(response.SetPasswordToken);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest model)
+    {
+        var response = await _userService.ForgotPassword(model);
+
+        return Ok(response.ErrorMessage);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> PasswordReset([FromBody] PasswordResetRequest model)
+    {
+        var response = await _userService.PasswordReset(model);
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
@@ -60,8 +79,8 @@ public class UserController : ControllerBase
     {
         var response = await _userService.AddUser(model);
 
-        if(response == null)
-            return BadRequest(new { message = "Username already in use" });
+        if(!response.IsSuccess)
+            return BadRequest(new { message = response.ErrorMessage });
 
         return Ok(response);
     }

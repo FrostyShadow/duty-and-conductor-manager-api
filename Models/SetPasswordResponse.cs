@@ -1,18 +1,14 @@
+using DutyAndConductorManager.Api.Helpers;
+
 namespace DutyAndConductorManager.Api.Models;
 
-public class SetPasswordResponse
+public class SetPasswordResponse : ResponseBase
 {
-    public bool IsSuccess {get;set;}
-    public string? ErrorMessage {get;set;}
-
-    public SetPasswordResponse(bool isSuccess)
+    public SetPasswordResponse(bool isSuccess) : base(isSuccess)
     {
-        IsSuccess = isSuccess;
     }
 
-    public SetPasswordResponse(bool isSuccess, string errorMessage)
+    public SetPasswordResponse(bool isSuccess, string errorMessage) : base(isSuccess, errorMessage)
     {
-        IsSuccess = isSuccess;
-        ErrorMessage = errorMessage;
     }
 }

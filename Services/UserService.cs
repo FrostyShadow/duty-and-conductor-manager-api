@@ -17,6 +17,8 @@ public interface IUserService
 {
     Task<AuthenticateResponse> Authenticate(AuthenticateRequest model);
     Task<ActivateResponse> Activate(ActivateRequest model);
+    Task<ForgotPasswordResponse> ForgotPassword(ForgotPasswordRequest model);
+    Task<PasswordResetResponse> PasswordReset(PasswordResetRequest model);
     Task<SetPasswordResponse> SetPassword(SetPasswordRequest model);
     Task<IEnumerable<User>> GetAll();
     Task<User> GetByIdAsync(int id);
@@ -37,23 +39,23 @@ public class UserService : IUserService
 
     public async Task<AuthenticateResponse> Authenticate(AuthenticateRequest model)
     {
-        var user = await _context.Users.Include(e => e.Role).SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == HashPassword(model.Password));
+        var user = await _context.Users.Include(e => e.Role).SingleOrDefaultAsync(x => x.Username == model.Username && x.Password == HashPassword(model.Password) && x.IsActive);
 
-        if (user == null) return null;
+        if (user == null) return new AuthenticateResponse(false, "Username or password is incorrect");
 
         var token = GenerateJwtToken(user);
 
-        return new AuthenticateResponse(user, token);
+        return new AuthenticateResponse(true, user, token);
     }
 
     public async Task<ActivateResponse> Activate(ActivateRequest model)
     {
-        var securityToken = await _context.SecurityTokens.FirstOrDefaultAsync(x => x.UserId == model.Id && x.Token == model.Token);
+        var activationToken = await _context.SecurityTokens.FirstOrDefaultAsync(x => x.UserId == model.Id && x.Token == model.Token && x.SecurityTokenTypeId == 1 && !x.IsUsed);
 
-        if (securityToken == null) 
+        if (activationToken == null) 
             return new ActivateResponse(false, "Activation token is incorrect");
 
-        if (securityToken.CreatedDateTime.AddHours(24) < DateTime.UtcNow)
+        if (activationToken.CreatedDateTime.AddHours(24) < DateTime.UtcNow)
             return new ActivateResponse(false, "Activation token is expired");
 
         var user = GetById(model.Id);
@@ -66,9 +68,10 @@ public class UserService : IUserService
         var setPasswordToken = new SecurityToken
         {
             CreatedDateTime = DateTime.UtcNow,
-            Token = new Guid(),
+            Token = Guid.NewGuid(),
             SecurityTokenTypeId = 2,
-            UserId = user.Id
+            UserId = user.Id,
+            IsUsed = false
         };
 
         await _context.SecurityTokens.AddAsync(setPasswordToken);
@@ -78,14 +81,69 @@ public class UserService : IUserService
         return new ActivateResponse(true, setPasswordToken.Token);
     }
 
+    // TODO: Add mail server support to send activation links via email
+    public async Task<ForgotPasswordResponse> ForgotPassword(ForgotPasswordRequest model)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
+
+        if (user == null)
+            return new ForgotPasswordResponse(true, "If this email exists in our database you'll recieve an email with a link to reset your password.");
+
+        var forgotPasswordToken = new SecurityToken
+        {
+            CreatedDateTime = DateTime.UtcNow,
+            Token = Guid.NewGuid(),
+            SecurityTokenTypeId = 3,
+            UserId = user.Id,
+            IsUsed = false
+        };
+
+        await _context.SecurityTokens.AddAsync(forgotPasswordToken);
+
+        await _context.SaveChangesAsync();
+
+        var securityUrl = $"http://localhost:5284/forgot-password/{user.Id}/{forgotPasswordToken.Token}";
+
+        // TODO: Replace this line with mail sending
+        Console.WriteLine(securityUrl);
+
+        return new ForgotPasswordResponse(true, "If this email exists in our database you'll recieve an email with a link to reset your password.");
+    }
+
+    public async Task<PasswordResetResponse> PasswordReset(PasswordResetRequest model)
+    {
+        var passwordResetToken = await _context.SecurityTokens.FirstOrDefaultAsync(x => x.UserId == model.Id && x.Token == model.Token && x.SecurityTokenTypeId == 3 && !x.IsUsed);
+
+        if (passwordResetToken == null) 
+            return new PasswordResetResponse(false, "Password reset token is incorrect");
+
+        if (passwordResetToken.CreatedDateTime.AddHours(24) < DateTime.UtcNow)
+            return new PasswordResetResponse(false, "Password reset token is expired");
+
+        var setPasswordToken = new SecurityToken
+        {
+            CreatedDateTime = DateTime.UtcNow,
+            Token = Guid.NewGuid(),
+            SecurityTokenTypeId = 2,
+            UserId = model.Id,
+            IsUsed = false
+        };
+
+        await _context.SecurityTokens.AddAsync(setPasswordToken);
+
+        await _context.SaveChangesAsync();
+
+        return new PasswordResetResponse(true, setPasswordToken.Token);
+    }
+
     public async Task<SetPasswordResponse> SetPassword(SetPasswordRequest model)
     {
-        var securityToken = await _context.SecurityTokens.FirstOrDefaultAsync(x => x.UserId == model.Id && x.Token == model.Token);
+        var setPasswordToken = await _context.SecurityTokens.FirstOrDefaultAsync(x => x.UserId == model.Id && x.Token == model.Token && x.SecurityTokenTypeId == 2 && !x.IsUsed);
 
-        if (securityToken == null) 
+        if (setPasswordToken == null) 
             return new SetPasswordResponse(false, "Set password token is incorrect");
 
-        if (securityToken.CreatedDateTime.AddHours(24) < DateTime.UtcNow)
+        if (setPasswordToken.CreatedDateTime.AddHours(24) < DateTime.UtcNow)
             return new SetPasswordResponse(false, "Set password token is expired");
 
         var user = GetById(model.Id);
@@ -105,7 +163,7 @@ public class UserService : IUserService
     public async Task<AddUserResponse> AddUser(AddUserRequest model)
     {
         if(await _context.Users.AnyAsync(x => x.Username == model.Username || x.Email == model.Email))
-            return null;
+            return new AddUserResponse(false, "Username or Email already in use");
 
         var user = await _context.Users.AddAsync(new User
         {
@@ -126,7 +184,9 @@ public class UserService : IUserService
         {
             CreatedDateTime = DateTime.Now,
             UserId = user.Entity.Id,
-            Token = Guid.NewGuid()
+            Token = Guid.NewGuid(),
+            SecurityTokenTypeId = 1,
+            IsUsed = false
         };
 
         await _context.SecurityTokens.AddAsync(securityToken);
@@ -134,9 +194,10 @@ public class UserService : IUserService
 
         var securityUrl = $"http://localhost:5284/activate/{user.Entity.Id}/{securityToken.Token}";
 
+        // TODO: Replace this line with mail sending
         Console.WriteLine(securityUrl);
 
-        return new AddUserResponse(user.Entity.Id);
+        return new AddUserResponse(user.Entity.Id, true);
     }
 
     private User GetById(int id) => _context.Users.FirstOrDefault(x => x.Id == id);

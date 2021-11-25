@@ -25,10 +25,6 @@ public class ConductorDb : DbContext
             .WithMany(e => e.SecurityTokens)
             .HasForeignKey(e => e.SecurityTokenTypeId);
 
-        modelBuilder.Entity<SecurityToken>()
-            .Property(e => e.SecurityTokenTypeId)
-            .HasDefaultValue(1);
-
         // Static data
         modelBuilder.Entity<Role>()
             .HasData(new List<Role>
@@ -62,6 +58,11 @@ public class ConductorDb : DbContext
                 {
                     Id = 2,
                     Name = "PasswordChangeToken"
+                },
+                new SecurityTokenType
+                {
+                    Id = 3,
+                    Name = "ForgotPasswordToken"
                 }
             });
     }

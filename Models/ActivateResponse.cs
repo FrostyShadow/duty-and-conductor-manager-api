@@ -1,12 +1,11 @@
 using DutyAndConductorManager.Api.Entities;
+using DutyAndConductorManager.Api.Helpers;
 
 namespace DutyAndConductorManager.Api.Models;
 
-public class ActivateResponse
+public class ActivateResponse : ResponseBase
 {
-    public bool IsSuccess {get;set;}
     public Guid SetPasswordToken {get;set;}
-    public string? ErrorMessage {get;set;}
 
     public ActivateResponse(bool isSuccess, Guid setPasswordToken)
     {
@@ -14,9 +13,5 @@ public class ActivateResponse
         SetPasswordToken = setPasswordToken;
     }
 
-    public ActivateResponse(bool isSuccess, string errorMessage)
-    {
-        IsSuccess = isSuccess;
-        ErrorMessage = errorMessage;
-    }
+    public ActivateResponse(bool isSuccess, string errorMessage) : base(isSuccess, errorMessage) {}
 }
