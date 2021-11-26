@@ -23,6 +23,7 @@ public interface IUserService
     Task<IEnumerable<User>> GetAll();
     Task<User> GetByIdAsync(int id);
     Task<AddUserResponse> AddUser(AddUserRequest model);
+    Task<DeleteUserResponse> DeleteUser(DeleteUserRequest model);
 }
 
 public class UserService : IUserService
@@ -87,7 +88,7 @@ public class UserService : IUserService
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
 
         if (user == null)
-            return new ForgotPasswordResponse(true, "If this email exists in our database you'll recieve an email with a link to reset your password.");
+            return new ForgotPasswordResponse(true);
 
         var forgotPasswordToken = new SecurityToken
         {
@@ -107,7 +108,7 @@ public class UserService : IUserService
         // TODO: Replace this line with mail sending
         Console.WriteLine(securityUrl);
 
-        return new ForgotPasswordResponse(true, "If this email exists in our database you'll recieve an email with a link to reset your password.");
+        return new ForgotPasswordResponse(true);
     }
 
     public async Task<PasswordResetResponse> PasswordReset(PasswordResetRequest model)
@@ -201,6 +202,19 @@ public class UserService : IUserService
     }
 
     private User GetById(int id) => _context.Users.FirstOrDefault(x => x.Id == id);
+
+    public async Task<DeleteUserResponse> DeleteUser(DeleteUserRequest model)
+    {
+        var user = GetById(model.Id);
+
+        if (user == null)
+            return new DeleteUserResponse(false, "User not found");
+
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+
+        return new DeleteUserResponse(true);
+    }
 
     private string GenerateJwtToken(User user)
     {

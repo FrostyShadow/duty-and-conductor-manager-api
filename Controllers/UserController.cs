@@ -42,7 +42,7 @@ public class UserController : ControllerBase
     {
         var response = await _userService.ForgotPassword(model);
 
-        return Ok(response.ErrorMessage);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -83,5 +83,16 @@ public class UserController : ControllerBase
             return BadRequest(new { message = response.ErrorMessage });
 
         return Ok(response);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteUser([FromBody] DeleteUserRequest model)
+    {
+        var response = await _userService.DeleteUser(model);
+
+        if(!response.IsSuccess)
+            return BadRequest(new { message = response.ErrorMessage });
+
+        return Ok(response.IsSuccess);
     }
 }
