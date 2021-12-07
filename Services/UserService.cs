@@ -23,6 +23,7 @@ public interface IUserService
     Task<IEnumerable<User>> GetAll();
     Task<User> GetByIdAsync(int id);
     Task<AddUserResponse> AddUser(AddUserRequest model);
+    Task<EditUserResponse> EditUser(EditUserRequest model);
     Task<DeleteUserResponse> DeleteUser(DeleteUserRequest model);
 }
 
@@ -199,6 +200,52 @@ public class UserService : IUserService
         Console.WriteLine(securityUrl);
 
         return new AddUserResponse(user.Entity.Id, true);
+    }
+
+    public async Task<EditUserResponse> EditUser(EditUserRequest model)
+    {
+        var editingUser = GetById(model.EditingUserId);
+        if(editingUser == null)
+            return new EditUserResponse(false, "Invalid editing user id");
+
+        if(editingUser.RoleId != 1 && model.IsAdminEdit)
+            return new EditUserResponse(false, "Unauthorized");
+
+        if(editingUser.Id == model.Id && model.IsAdminEdit)
+            return new EditUserResponse(false, "Self editing not allowed with admin privileges");
+
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if(user == null)
+            return new EditUserResponse(false, "Invalid user id");
+
+
+        if(model.IsAdminEdit)
+        {
+            user.FirstName = model.FirstName ?? user.FirstName;
+            user.LastName = model.LastName ?? user.LastName;
+            user.Password = model.Password != null ? HashPassword(model.Password) : user.Password;
+            user.Email = model.Email ?? user.Email;
+            user.IsActive = model.IsActive;
+            user.RoleId = model.RoleId ?? user.RoleId;
+            user.IsTrained = model.IsTrained;
+            user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
+            user.Photo = model.Photo ?? user.Photo;
+
+            await _context.SaveChangesAsync();
+
+            return new EditUserResponse(true);
+        }
+        
+        user.FirstName = model.FirstName ?? user.FirstName;
+        user.LastName = model.LastName ?? user.LastName;
+        user.Password = model.Password != null ? HashPassword(model.Password) : user.Password;
+        user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
+        user.Photo = model.Photo ?? user.Photo;
+
+        await _context.SaveChangesAsync();
+
+        return new EditUserResponse(true);
     }
 
     private User GetById(int id) => _context.Users.FirstOrDefault(x => x.Id == id);
