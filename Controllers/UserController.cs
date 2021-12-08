@@ -86,6 +86,17 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
+    public async Task<IActionResult> EditUser([FromBody] EditUserRequest model)
+    {
+        var response = await _userService.EditUser(model);
+
+        if(!response.IsSuccess)
+            return BadRequest(new { message = response.ErrorMessage });
+
+        return Ok(response.IsSuccess);
+    }
+
+    [HttpPost]
     public async Task<IActionResult> DeleteUser([FromBody] DeleteUserRequest model)
     {
         var response = await _userService.DeleteUser(model);
