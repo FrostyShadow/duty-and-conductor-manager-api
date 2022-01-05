@@ -74,6 +74,13 @@ public class UserController : ControllerBase
         return Ok(users);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetById([FromQuery] int id)
+    {
+        var user = await _userService.GetByIdAsync(id);
+        return Ok(user);
+    }
+
     [HttpPost]
     public async Task<IActionResult> AddUser([FromBody] AddUserRequest model)
     {
