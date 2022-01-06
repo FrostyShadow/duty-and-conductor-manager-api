@@ -41,6 +41,7 @@ builder.Services.AddDbContext<ConductorDb>(config =>
 }, ServiceLifetime.Transient);
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IRoleService, RoleService>();
+builder.Services.AddTransient<IAnnouncementService, AnnouncementService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
