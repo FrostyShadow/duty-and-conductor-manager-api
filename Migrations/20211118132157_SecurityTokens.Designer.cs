@@ -4,6 +4,7 @@ using DutyAndConductorManager.Api.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DutyAndConductorManager.Api.Migrations
 {
     [DbContext(typeof(ConductorDb))]
-    partial class ConductorDbModelSnapshot : ModelSnapshot
+    [Migration("20211118132157_SecurityTokens")]
+    partial class SecurityTokens
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,12 +69,6 @@ namespace DutyAndConductorManager.Api.Migrations
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("SecurityTokenTypeId")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("Token")
                         .HasColumnType("uniqueidentifier");
 
@@ -81,45 +77,9 @@ namespace DutyAndConductorManager.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SecurityTokenTypeId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("SecurityTokens");
-                });
-
-            modelBuilder.Entity("DutyAndConductorManager.Api.Entities.SecurityTokenType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SecurityTokenTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "ActivationToken"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "PasswordChangeToken"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "ForgotPasswordToken"
-                        });
                 });
 
             modelBuilder.Entity("DutyAndConductorManager.Api.Entities.User", b =>
@@ -152,6 +112,7 @@ namespace DutyAndConductorManager.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
@@ -176,19 +137,11 @@ namespace DutyAndConductorManager.Api.Migrations
 
             modelBuilder.Entity("DutyAndConductorManager.Api.Entities.SecurityToken", b =>
                 {
-                    b.HasOne("DutyAndConductorManager.Api.Entities.SecurityTokenType", "SecurityTokenType")
-                        .WithMany("SecurityTokens")
-                        .HasForeignKey("SecurityTokenTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DutyAndConductorManager.Api.Entities.User", "User")
                         .WithMany("SecurityTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("SecurityTokenType");
 
                     b.Navigation("User");
                 });
@@ -207,11 +160,6 @@ namespace DutyAndConductorManager.Api.Migrations
             modelBuilder.Entity("DutyAndConductorManager.Api.Entities.Role", b =>
                 {
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("DutyAndConductorManager.Api.Entities.SecurityTokenType", b =>
-                {
-                    b.Navigation("SecurityTokens");
                 });
 
             modelBuilder.Entity("DutyAndConductorManager.Api.Entities.User", b =>

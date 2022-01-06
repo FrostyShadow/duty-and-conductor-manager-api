@@ -4,6 +4,7 @@ using DutyAndConductorManager.Api.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DutyAndConductorManager.Api.Migrations
 {
     [DbContext(typeof(ConductorDb))]
-    partial class ConductorDbModelSnapshot : ModelSnapshot
+    [Migration("20211124133206_AddSecurityTokenTypes")]
+    partial class AddSecurityTokenTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,11 +69,10 @@ namespace DutyAndConductorManager.Api.Migrations
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
-
                     b.Property<int>("SecurityTokenTypeId")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<Guid>("Token")
                         .HasColumnType("uniqueidentifier");
@@ -114,11 +115,6 @@ namespace DutyAndConductorManager.Api.Migrations
                         {
                             Id = 2,
                             Name = "PasswordChangeToken"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "ForgotPasswordToken"
                         });
                 });
 

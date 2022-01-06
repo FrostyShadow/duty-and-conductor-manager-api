@@ -5,6 +5,8 @@ using DutyAndConductorManager.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,9 +27,8 @@ builder.Host.UseSerilog((context, services, config) => config
 
 // Add services to the container.
 builder.Services.AddCors();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
-builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "Duty and Conductor Manager Api", Version = "v1" });
@@ -37,7 +38,9 @@ builder.Services.AddDbContext<ConductorDb>(config =>
     config.UseSqlServer(builder.Configuration.GetConnectionString("ConductorDb"));
     if (builder.Environment.IsDevelopment())
         config.EnableSensitiveDataLogging(true);
-});
+}, ServiceLifetime.Transient);
+builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IRoleService, RoleService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
