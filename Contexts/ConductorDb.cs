@@ -10,6 +10,14 @@ public class ConductorDb : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Table definitions
+        modelBuilder.Entity<User>()
+            .ToTable("Users", x => x.IsTemporal());
+
+        modelBuilder.Entity<Announcement>()
+            .ToTable("Announcements", x => x.IsTemporal());
+
+        // Relationships
         modelBuilder.Entity<User>()
             .HasOne<Role>(e => e.Role)
             .WithMany(e => e.Users)
