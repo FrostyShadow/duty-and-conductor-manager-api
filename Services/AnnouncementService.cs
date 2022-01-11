@@ -24,11 +24,11 @@ public class AnnouncementService : IAnnouncementService
         _context = context;
     }
 
-    public async Task<Announcement> GetByIdAsync(int id) => await _context.Announcements.FirstOrDefaultAsync(x => x.Id == id);
+    public async Task<Announcement> GetByIdAsync(int id) => await _context.Announcements.Include(x => x.User).Include(x => x.AnnouncementType).FirstOrDefaultAsync(x => x.Id == id);
 
     public Announcement GetById(int id) => _context.Announcements.FirstOrDefault(x => x.Id == id);
 
-    public async Task<IEnumerable<Announcement>> GetAll() => await _context.Announcements.ToListAsync();
+    public async Task<IEnumerable<Announcement>> GetAll() => await _context.Announcements.Include(x => x.User).Include(x => x.AnnouncementType).ToListAsync();
 
     public async Task<AddAnnouncementResponse> AddAnnouncement(AddAnnouncementRequest model)
     {
