@@ -21,4 +21,5 @@ public class User
     public Role Role {get;set;}
 
     public IList<SecurityToken> SecurityTokens {get;set;}
+    public IList<Announcement> Announcements {get;set;}
 }
