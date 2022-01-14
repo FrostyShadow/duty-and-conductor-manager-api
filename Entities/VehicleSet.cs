@@ -2,10 +2,10 @@ namespace DutyAndConductorManager.Api.Entities;
 
 public class VehicleSet
 {
-    public int Id {get;set;}
+    public int SetId {get;set;}
     public int VehicleId {get;set;}
-    public int? ParentId {get;set;}
+    public int Index {get;set;}
 
-    public VehicleModel Vehicle {get;set;}
-    public VehicleSet Parent {get;set;}
+    public Vehicle Vehicle {get;set;}
+    public Set Set {get;set;}
 }

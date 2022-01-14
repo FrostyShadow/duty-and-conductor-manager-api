@@ -43,6 +43,35 @@ public class ConductorDb : DbContext
             .WithMany(e => e.Announcements)
             .HasForeignKey(e => e.AnnouncementTypeId);
 
+
+        modelBuilder.Entity<VehicleModel>()
+            .HasOne<VehicleManufacturer>(e => e.Manufacturer)
+            .WithMany(e => e.Models)
+            .HasForeignKey(e => e.ManufacturerId);
+
+        modelBuilder.Entity<VehicleModel>()
+            .HasOne<VehicleType>(e => e.VehicleType)
+            .WithMany(e => e.Models)
+            .HasForeignKey(e => e.VehicleTypeId);
+
+        modelBuilder.Entity<Vehicle>()
+            .HasOne<VehicleModel>(e => e.Model)
+            .WithMany(e => e.Vehicles)
+            .HasForeignKey(e => e.ModelId);
+
+        modelBuilder.Entity<VehicleSet>()
+            .HasOne<Vehicle>(e => e.Vehicle)
+            .WithMany(e => e.VehicleSets)
+            .HasForeignKey(e => e.VehicleId);
+
+        modelBuilder.Entity<VehicleSet>()
+            .HasOne<Set>(e => e.Set)
+            .WithMany(e => e.VehicleSets)
+            .HasForeignKey(e => e.SetId);
+
+        modelBuilder.Entity<VehicleSet>()
+            .HasKey(e => new { e.SetId, e.VehicleId });
+
         // Static data
         modelBuilder.Entity<Role>()
             .HasData(new List<Role>
@@ -98,6 +127,31 @@ public class ConductorDb : DbContext
                     Name = "ImportantAnnouncement"
                 }
             });
+
+        modelBuilder.Entity<VehicleType>()
+            .HasData(new List<VehicleType>
+            {
+                new VehicleType
+                {
+                    Id = 1,
+                    Name = "TramEngineCar"
+                },
+                new VehicleType
+                {
+                    Id = 2,
+                    Name = "TramPassiveCar"
+                },
+                new VehicleType
+                {
+                    Id = 3,
+                    Name = "Bus"
+                },
+                new VehicleType
+                {
+                    Id = 4,
+                    Name = "BusTrailer"
+                }
+            });
     }
 
     public DbSet<User> Users {get;set;}
@@ -106,4 +160,10 @@ public class ConductorDb : DbContext
     public DbSet<SecurityTokenType> SecurityTokenTypes {get;set;}
     public DbSet<Announcement> Announcements {get;set;}
     public DbSet<AnnouncementType> AnnouncementTypes {get;set;}
+    public DbSet<Set> Sets {get;set;}
+    public DbSet<Vehicle> Vehicles {get;set;}
+    public DbSet<VehicleManufacturer> VehicleManufacturers {get;set;}
+    public DbSet<VehicleModel> VehicleModels {get;set;}
+    public DbSet<VehicleSet> VehicleSets {get;set;}
+    public DbSet<VehicleType> VehicleTypes {get;set;}
 }
