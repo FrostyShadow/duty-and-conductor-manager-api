@@ -1,5 +1,6 @@
 using DutyAndConductorManager.Api.Contexts;
 using DutyAndConductorManager.Api.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DutyAndConductorManager.Api.Services;
 
@@ -16,6 +17,8 @@ public interface IVehicleService
     
     Task<Set> GetSetById(int id);
     Task<IEnumerable<Set>> GetAllSets();
+
+    Task<IEnumerable<VehicleSet>> GetVehiclesInSet(int id);
 
     Task AddVehicle();
     Task EditVehicle();
@@ -103,43 +106,21 @@ public class VehicleService : IVehicleService
         throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<Set>> GetAllSets()
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<IEnumerable<Set>> GetAllSets() => await _context.Sets.ToListAsync();
 
-    public async Task<IEnumerable<VehicleManufacturer>> GetAllVehicleManufacturers()
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<IEnumerable<VehicleManufacturer>> GetAllVehicleManufacturers() => await _context.VehicleManufacturers.ToListAsync();
 
-    public async Task<IEnumerable<VehicleModel>> GetAllVehicleModels()
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<IEnumerable<VehicleModel>> GetAllVehicleModels() => await _context.VehicleModels.ToListAsync();
 
-    public async Task<IEnumerable<Vehicle>> GetAllVehicles()
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<IEnumerable<Vehicle>> GetAllVehicles() => await _context.Vehicles.ToListAsync();
 
-    public async Task<Set> GetSetById(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<Set> GetSetById(int id) => await _context.Sets.Include(x => x.VehicleSets).FirstOrDefaultAsync(x => x.Id == id);
 
-    public async Task<Vehicle> GetVehicleById(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<Vehicle> GetVehicleById(int id) => await _context.Vehicles.Include(x => x.Model).Include(x => x.Model.VehicleType).Include(x => x.Model.Manufacturer).FirstOrDefaultAsync(x => x.Id == id);
 
-    public async Task<VehicleManufacturer> GetVehicleManufacturerById(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<VehicleManufacturer> GetVehicleManufacturerById(int id) => await _context.VehicleManufacturers.FirstOrDefaultAsync(x => x.Id == id);
 
-    public async Task<VehicleModel> GetVehicleModelById(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<VehicleModel> GetVehicleModelById(int id) => await _context.VehicleModels.Include(x => x.Manufacturer).Include(x => x.VehicleType).FirstOrDefaultAsync(x => x.Id == id);
+
+    public async Task<IEnumerable<VehicleSet>> GetVehiclesInSet(int id) => await _context.VehicleSets.Include(x => x.Vehicle).Where(x => x.SetId == id).ToListAsync();
 }
