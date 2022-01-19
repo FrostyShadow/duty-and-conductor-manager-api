@@ -1,5 +1,6 @@
 using DutyAndConductorManager.Api.Contexts;
 using DutyAndConductorManager.Api.Entities;
+using DutyAndConductorManager.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DutyAndConductorManager.Api.Services;
@@ -20,19 +21,19 @@ public interface IVehicleService
 
     Task<IEnumerable<VehicleSet>> GetVehiclesInSet(int id);
 
-    Task AddVehicle();
+    Task<AddVehicleResponse> AddVehicle(AddVehicleRequest model);
     Task EditVehicle();
     Task DeleteVehicle();
 
-    Task AddVehicleManufacturer();
+    Task<AddVehicleManufacturerResponse> AddVehicleManufacturer(AddVehicleManufacturerRequest model);
     Task EditVehicleManufacturer();
     Task DeleteVehicleManufacturer();
 
-    Task AddVehicleModel();
+    Task<AddVehicleModelResponse> AddVehicleModel(AddVehicleModelRequest model);
     Task EditVehicleModel();
     Task DeleteVehicleModel();
 
-    Task AddSet();
+    Task<AddSetResponse> AddSet(AddSetRequest model);
     Task EditSet();
     Task DeleteSet();
 }
@@ -46,24 +47,74 @@ public class VehicleService : IVehicleService
         _context = context;
     }
 
-    public async Task AddSet()
+    public async Task<AddSetResponse> AddSet(AddSetRequest model)
     {
-        throw new NotImplementedException();
+        if (!await _context.Sets.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.Ordinal) == 0))
+            return new AddSetResponse(false, "Set already exists");
+
+        if (!await _context.Vehicles.Where(x => model.Vehicles.Any(y => y.VehicleId == x.Id)).AnyAsync())
+            return new AddSetResponse(false, "Vehicle doesn't exist");
+
+        await _context.Sets.AddAsync(new Set
+        {
+            Name = model.Name,
+            VehicleSets = model.Vehicles
+        });
+        await _context.SaveChangesAsync();
+        return new AddSetResponse(true);
     }
 
-    public async Task AddVehicle()
+    public async Task<AddVehicleResponse> AddVehicle(AddVehicleRequest model)
     {
-        throw new NotImplementedException();
+        if (!await _context.VehicleModels.AnyAsync(x => x.Id == model.ModelId))
+            return new AddVehicleResponse(false, "Vehicle Model doesn't exist");
+
+        if (!await _context.Vehicles.AnyAsync(x => string.Compare(x.SideNumber, model.SideNumber, StringComparison.OrdinalIgnoreCase) == 0))
+            return new AddVehicleResponse(false, "Vehicle already exists");
+
+        await _context.Vehicles.AddAsync(new Vehicle
+        {
+            SideNumber = model.SideNumber,
+            ModelId = model.ModelId
+        });
+        await _context.SaveChangesAsync();
+
+        return new AddVehicleResponse(true);
     }
 
-    public async Task AddVehicleManufacturer()
+    public async Task<AddVehicleManufacturerResponse> AddVehicleManufacturer(AddVehicleManufacturerRequest model)
     {
-        throw new NotImplementedException();
+        if (!await _context.VehicleManufacturers.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.OrdinalIgnoreCase) == 0))
+            return new AddVehicleManufacturerResponse(false, "Manufacturer already exists");
+
+        await _context.VehicleManufacturers.AddAsync(new VehicleManufacturer
+        {
+            Name = model.Name
+        });
+        await _context.SaveChangesAsync();
+        return new AddVehicleManufacturerResponse(true);
     }
 
-    public async Task AddVehicleModel()
+    public async Task<AddVehicleModelResponse> AddVehicleModel(AddVehicleModelRequest model)
     {
-        throw new NotImplementedException();
+        if (!await _context.VehicleManufacturers.AnyAsync(x => x.Id == model.ManufacturerId))
+            return new AddVehicleModelResponse(false, "Manufacturer doesn't exist");
+
+        if (!await _context.VehicleTypes.AnyAsync(x => x.Id == model.VehicleTypeId))
+            return new AddVehicleModelResponse(false, "Vehicle type doesn't exist");
+
+        if (!await _context.VehicleModels.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.OrdinalIgnoreCase) == 0))
+            return new AddVehicleModelResponse(false, "Vehicle Model already exists");
+
+        await _context.VehicleModels.AddAsync(new VehicleModel
+        {
+            Name = model.Name,
+            IsCoupleable = model.IsCoupleable,
+            ManufacturerId = model.ManufacturerId,
+            VehicleTypeId = model.VehicleTypeId
+        });
+        await _context.SaveChangesAsync();
+        return new AddVehicleModelResponse(true);
     }
 
     public async Task DeleteSet()
