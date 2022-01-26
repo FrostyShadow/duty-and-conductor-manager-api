@@ -22,19 +22,19 @@ public interface IVehicleService
     Task<IEnumerable<VehicleSet>> GetVehiclesInSet(int id);
 
     Task<AddVehicleResponse> AddVehicle(AddVehicleRequest model);
-    Task EditVehicle();
+    Task<EditVehicleResponse> EditVehicle(EditVehicleRequest model);
     Task DeleteVehicle();
 
     Task<AddVehicleManufacturerResponse> AddVehicleManufacturer(AddVehicleManufacturerRequest model);
-    Task EditVehicleManufacturer();
+    Task<EditVehicleManufacturerResponse> EditVehicleManufacturer(EditVehicleManufacturerRequest model);
     Task DeleteVehicleManufacturer();
 
     Task<AddVehicleModelResponse> AddVehicleModel(AddVehicleModelRequest model);
-    Task EditVehicleModel();
+    Task<EditVehicleModelResponse> EditVehicleModel(EditVehicleModelRequest model);
     Task DeleteVehicleModel();
 
     Task<AddSetResponse> AddSet(AddSetRequest model);
-    Task EditSet();
+    Task<EditSetResponse> EditSet(EditSetRequest model);
     Task DeleteSet();
 }
 
@@ -137,24 +137,90 @@ public class VehicleService : IVehicleService
         throw new NotImplementedException();
     }
 
-    public async Task EditSet()
+    public async Task<EditSetResponse> EditSet(EditSetRequest model)
     {
-        throw new NotImplementedException();
+        var set = await _context.Sets.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (set == null)
+            return new EditSetResponse(false, "Set not found");
+
+        if (await _context.Sets.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.OrdinalIgnoreCase) == 0))
+            return new EditSetResponse(false, "Set with that name already exists");
+
+        var vehicleSets = await _context.VehicleSets.Where(x => x.SetId == model.Id).ToListAsync();
+
+        _context.VehicleSets.RemoveRange(vehicleSets);
+        
+        set.Name = model.Name;
+        set.VehicleSets = model.VehicleSets;
+
+        await _context.SaveChangesAsync();
+
+        return new EditSetResponse(true);
     }
 
-    public async Task EditVehicle()
+    public async Task<EditVehicleResponse> EditVehicle(EditVehicleRequest model)
     {
-        throw new NotImplementedException();
+        var vehicle = await _context.Vehicles.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (vehicle == null)
+            return new EditVehicleResponse(false, "Vehicle not found");
+
+        if (!await _context.VehicleModels.AnyAsync(x => x.Id == model.ModelId))
+            return new EditVehicleResponse(false, "Vehicle model not found");
+
+        if (await _context.Vehicles.AnyAsync(x => string.Compare(x.SideNumber, model.SideNumber, StringComparison.OrdinalIgnoreCase) == 0))
+            return new EditVehicleResponse(false, "Vehicle with that SideNumber already exists");
+
+        vehicle.ModelId = model.ModelId;
+        vehicle.SideNumber = model.SideNumber;
+
+        await _context. SaveChangesAsync();
+
+        return new EditVehicleResponse(true);
     }
 
-    public async Task EditVehicleManufacturer()
+    public async Task<EditVehicleManufacturerResponse> EditVehicleManufacturer(EditVehicleManufacturerRequest model)
     {
-        throw new NotImplementedException();
+        var manufacturer = await _context.VehicleManufacturers.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (manufacturer == null)
+            return new EditVehicleManufacturerResponse(false, "Manufacturer not found");
+
+        if (await _context.VehicleManufacturers.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.OrdinalIgnoreCase) == 0))
+            return new EditVehicleManufacturerResponse(false, "Manufacturer with that name already exists");
+
+        manufacturer.Name = model.Name;
+
+        await _context.SaveChangesAsync();
+
+        return new EditVehicleManufacturerResponse(true);
     }
 
-    public async Task EditVehicleModel()
+    public async Task<EditVehicleModelResponse> EditVehicleModel(EditVehicleModelRequest model)
     {
-        throw new NotImplementedException();
+        var vModel = await _context.VehicleModels.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (vModel == null)
+            return new EditVehicleModelResponse(false, "Vehicle Model not found");
+
+        if (await _context.VehicleModels.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.OrdinalIgnoreCase) == 0))
+            return new EditVehicleModelResponse(false, "Vehicle Model with that name already exists");
+
+        if (!await _context.VehicleTypes.AnyAsync(x => x.Id == model.VehicleTypeId))
+            return new EditVehicleModelResponse(false, "Vehicle type doesn't exist");
+
+        if (!await _context.VehicleManufacturers.AnyAsync(x => x.Id == model.ManufacturerId))
+            return new EditVehicleModelResponse(false, "Vehicle manufacturer doens't exist");
+
+        vModel.Name = model.Name;
+        vModel.ManufacturerId = model.ManufacturerId;
+        vModel.VehicleTypeId = model.VehicleTypeId;
+        vModel.IsCoupleable = model.IsCoupleable;
+
+        await _context.SaveChangesAsync();
+
+        return new EditVehicleModelResponse(true);
     }
 
     public async Task<IEnumerable<Set>> GetAllSets() => await _context.Sets.ToListAsync();
