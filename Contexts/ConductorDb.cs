@@ -72,6 +72,11 @@ public class ConductorDb : DbContext
         modelBuilder.Entity<VehicleSet>()
             .HasKey(e => new { e.SetId, e.VehicleId });
 
+        modelBuilder.Entity<Line>()
+            .HasOne<LineType>(e => e.LineType)
+            .WithMany(e => e.Lines)
+            .HasForeignKey(e => e.LineTypeId);
+
         // Static data
         modelBuilder.Entity<Role>()
             .HasData(new List<Role>
@@ -152,6 +157,21 @@ public class ConductorDb : DbContext
                     Name = "BusTrailer"
                 }
             });
+
+        modelBuilder.Entity<LineType>()
+            .HasData(new List<LineType>
+            {
+                new LineType
+                {
+                    Id = 1,
+                    Name = "TramLine"
+                },
+                new LineType
+                {
+                    Id = 2,
+                    Name = "BusLine"
+                }
+            });
     }
 
     public DbSet<User> Users {get;set;}
@@ -166,4 +186,6 @@ public class ConductorDb : DbContext
     public DbSet<VehicleModel> VehicleModels {get;set;}
     public DbSet<VehicleSet> VehicleSets {get;set;}
     public DbSet<VehicleType> VehicleTypes {get;set;}
+    public DbSet<Line> Lines {get;set;}
+    public DbSet<LineType> LineTypes {get;set;}
 }

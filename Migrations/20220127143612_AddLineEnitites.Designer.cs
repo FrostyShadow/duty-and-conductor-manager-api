@@ -4,6 +4,7 @@ using DutyAndConductorManager.Api.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DutyAndConductorManager.Api.Migrations
 {
     [DbContext(typeof(ConductorDb))]
-    partial class ConductorDbModelSnapshot : ModelSnapshot
+    [Migration("20220127143612_AddLineEnitites")]
+    partial class AddLineEnitites
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
