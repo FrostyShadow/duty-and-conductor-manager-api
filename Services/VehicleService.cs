@@ -23,19 +23,19 @@ public interface IVehicleService
 
     Task<AddVehicleResponse> AddVehicle(AddVehicleRequest model);
     Task<EditVehicleResponse> EditVehicle(EditVehicleRequest model);
-    Task DeleteVehicle();
+    Task<DeleteVehicleResponse> DeleteVehicle(DeleteVehicleRequest model);
 
     Task<AddVehicleManufacturerResponse> AddVehicleManufacturer(AddVehicleManufacturerRequest model);
     Task<EditVehicleManufacturerResponse> EditVehicleManufacturer(EditVehicleManufacturerRequest model);
-    Task DeleteVehicleManufacturer();
+    Task<DeleteVehicleManufacturerResponse> DeleteVehicleManufacturer(DeleteVehicleManufacturerRequest model);
 
     Task<AddVehicleModelResponse> AddVehicleModel(AddVehicleModelRequest model);
     Task<EditVehicleModelResponse> EditVehicleModel(EditVehicleModelRequest model);
-    Task DeleteVehicleModel();
+    Task<DeleteVehicleModelResponse> DeleteVehicleModel(DeleteVehicleModelRequest model);
 
     Task<AddSetResponse> AddSet(AddSetRequest model);
     Task<EditSetResponse> EditSet(EditSetRequest model);
-    Task DeleteSet();
+    Task<DeleteSetResponse> DeleteSet(DeleteSetRequest model);
 }
 
 public class VehicleService : IVehicleService
@@ -117,24 +117,59 @@ public class VehicleService : IVehicleService
         return new AddVehicleModelResponse(true);
     }
 
-    public async Task DeleteSet()
+    public async Task<DeleteSetResponse> DeleteSet(DeleteSetRequest model)
     {
-        throw new NotImplementedException();
+        var set = await _context.Sets.Include(x => x.VehicleSets).FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (set == null)
+            return new DeleteSetResponse(false, "Set not found");
+
+        if (set.VehicleSets != null)
+            _context.VehicleSets.RemoveRange(set.VehicleSets);
+
+        _context.Sets.Remove(set);
+        await _context.SaveChangesAsync();
+
+        return new DeleteSetResponse(true);
     }
 
-    public async Task DeleteVehicle()
+    public async Task<DeleteVehicleResponse> DeleteVehicle(DeleteVehicleRequest model)
     {
-        throw new NotImplementedException();
+        var vehicle = await _context.Vehicles.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (vehicle == null)
+            return new DeleteVehicleResponse(false, "Vehicle not found");
+
+        _context.Vehicles.Remove(vehicle);
+        await _context.SaveChangesAsync();
+
+        return new DeleteVehicleResponse(true);
     }
 
-    public async Task DeleteVehicleManufacturer()
+    public async Task<DeleteVehicleManufacturerResponse> DeleteVehicleManufacturer(DeleteVehicleManufacturerRequest model)
     {
-        throw new NotImplementedException();
+        var manufacturer = await _context.VehicleManufacturers.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (manufacturer == null)
+            return new DeleteVehicleManufacturerResponse(false, "Manufacturer not found");
+
+        _context.VehicleManufacturers.Remove(manufacturer);
+        await _context.SaveChangesAsync();
+
+        return new DeleteVehicleManufacturerResponse(true);
     }
 
-    public async Task DeleteVehicleModel()
+    public async Task<DeleteVehicleModelResponse> DeleteVehicleModel(DeleteVehicleModelRequest model)
     {
-        throw new NotImplementedException();
+        var vModel = await _context.VehicleModels.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (vModel == null)
+            return new DeleteVehicleModelResponse(false, "Vehicle model not found");
+
+        _context.VehicleModels.Remove(vModel);
+        await _context.SaveChangesAsync();
+
+        return new DeleteVehicleModelResponse(true);
     }
 
     public async Task<EditSetResponse> EditSet(EditSetRequest model)
