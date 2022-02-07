@@ -6,4 +6,5 @@ public class Set
     public string Name {get;set;}
     
     public IList<VehicleSet> VehicleSets {get;set;}
+    public IList<Brigade> Brigades {get;set;}
 }

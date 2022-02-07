@@ -77,6 +77,29 @@ public class ConductorDb : DbContext
             .WithMany(e => e.Lines)
             .HasForeignKey(e => e.LineTypeId);
 
+        modelBuilder.Entity<Brigade>()
+            .HasOne<Line>(e => e.Line)
+            .WithMany(e => e.Brigades)
+            .HasForeignKey(e => e.LineId);
+
+        modelBuilder.Entity<Brigade>()
+            .HasOne<Set>(e => e.Set)
+            .WithMany(e => e.Brigades)
+            .HasForeignKey(e => e.SetId);
+
+        modelBuilder.Entity<BrigadeUser>()
+            .HasKey(e => new { e.BrigadeId, e.UserId });
+
+        modelBuilder.Entity<BrigadeUser>()
+            .HasOne<Brigade>(e => e.Brigade)
+            .WithMany(e => e.BrigadeUsers)
+            .HasForeignKey(e => e.BrigadeId);
+
+        modelBuilder.Entity<BrigadeUser>()
+            .HasOne<User>(e => e.User)
+            .WithMany(e => e.BrigadeUsers)
+            .HasForeignKey(e => e.UserId);
+
         // Static data
         modelBuilder.Entity<Role>()
             .HasData(new List<Role>
@@ -188,4 +211,6 @@ public class ConductorDb : DbContext
     public DbSet<VehicleType> VehicleTypes {get;set;}
     public DbSet<Line> Lines {get;set;}
     public DbSet<LineType> LineTypes {get;set;}
+    public DbSet<Brigade> Brigades {get;set;}
+    public DbSet<BrigadeUser> BrigadeUsers {get;set;}
 }

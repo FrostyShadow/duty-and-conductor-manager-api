@@ -8,5 +8,6 @@ public class Line
     public DateTime StartDateTime {get;set;}
     public DateTime EndDateTime {get;set;}
 
-    public LineType LineType {get;set;}    
+    public LineType LineType {get;set;}  
+    public IList<Brigade> Brigades {get;set;}  
 }

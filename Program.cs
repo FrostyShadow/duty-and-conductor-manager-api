@@ -43,10 +43,7 @@ builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IRoleService, RoleService>();
 builder.Services.AddTransient<IAnnouncementService, AnnouncementService>();
 builder.Services.AddTransient<IVehicleService, VehicleService>();
-<<<<<<< HEAD
 builder.Services.AddTransient<ILineService, LineService>();
-=======
->>>>>>> 0c45cdd0182dab1086dbc0687abd2dbf0d45b02b
 builder.Services.AddTransient<IShiftService, ShiftService>();
 var app = builder.Build();
 
