@@ -11,8 +11,8 @@ public interface ILineService
     Task<IEnumerable<Line>> GetAll();
 
     Task<AddLineResponse> AddLine(AddLineRequest model);
-    Task EditLine();
-    Task DeleteLine();
+    Task<EditLineResponse> EditLine(EditLineRequest model);
+    Task<DeleteLineResponse> DeleteLine(DeleteLineRequest model);
 }
 
 public class LineService : ILineService
@@ -44,14 +44,37 @@ public class LineService : ILineService
         return new AddLineResponse(true);
     }
 
-    public Task DeleteLine()
+    public async Task<DeleteLineResponse> DeleteLine(DeleteLineRequest model)
     {
-        throw new NotImplementedException();
+        var line = await _context.Lines.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (line == null)
+            return new DeleteLineResponse(false, "Line not found");
+
+        _context.Lines.Remove(line);
+        await _context.SaveChangesAsync();
+
+        return new DeleteLineResponse(true);
     }
 
-    public Task EditLine()
+    public async Task<EditLineResponse> EditLine(EditLineRequest model)
     {
-        throw new NotImplementedException();
+        var line = await _context.Lines.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (line == null)
+            return new EditLineResponse(false, "Line not found");
+
+        if (!await _context.LineTypes.AnyAsync(x => x.Id == model.LineTypeId))
+            return new EditLineResponse(false, "Line type not found");
+
+        line.LineTypeId = model.LineTypeId;
+        line.Number = model.Number;
+        line.StartDateTime = model.StartDateTime;
+        line.EndDateTime = model.EndDateTime;
+
+        await _context.SaveChangesAsync();
+
+        return new EditLineResponse(true);
     }
 
     public async Task<IEnumerable<Line>> GetAll() => await _context.Lines.ToListAsync();
