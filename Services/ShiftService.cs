@@ -12,6 +12,7 @@ public interface IShiftService
     Task<IEnumerable<BrigadeUser>> GetUsersInBrigade(int id);
 
     Task<AddBrigadeResponse> AddBrigade(AddBrigadeRequest model);
+    Task<EditBrigadeResponse> EditBrigade(EditBrigadeRequest model);
 }
 
 public class ShiftService : IShiftService
@@ -52,6 +53,34 @@ public class ShiftService : IShiftService
         await _context.SaveChangesAsync();
 
         return new AddBrigadeResponse(true);
+    }
+
+    public async Task<EditBrigadeResponse> EditBrigade(EditBrigadeRequest model)
+    {
+        var brigade = await _context.Brigades.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (brigade == null)
+            return new EditBrigadeResponse(false, "Brigade not found");
+
+        if (!await _context.Lines.AnyAsync(x => x.Id == model.LineId))
+            return new EditBrigadeResponse(false, "Line not found");
+
+        if (!await _context.Sets.AnyAsync(x => x.Id == model.SetId))
+            return new EditBrigadeResponse(false, "Vehicle set not found");
+
+        if (await _context.Brigades.AnyAsync(x => x.Id != model.Id && x.Name == model.Name && x.LineId == model.LineId && x.DateTimeFrom >= model.DateTimeFrom && x.DateTimeTo <= model.DateTimeTo))
+            return new EditBrigadeResponse(false, "Brigade already exists");
+
+        brigade.Name = model.Name;
+        brigade.SetId = model.SetId;
+        brigade.LineId = model.LineId;
+        brigade.DateTimeFrom = model.DateTimeFrom;
+        brigade.DateTimeTo = model.DateTimeTo;
+        brigade.ConductorLimit = model.ConductorLimit;
+
+        await _context.SaveChangesAsync();
+
+        return new EditBrigadeResponse(true);
     }
 
 }
