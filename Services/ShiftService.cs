@@ -13,6 +13,7 @@ public interface IShiftService
 
     Task<AddBrigadeResponse> AddBrigade(AddBrigadeRequest model);
     Task<EditBrigadeResponse> EditBrigade(EditBrigadeRequest model);
+    Task<DeleteBrigadeResponse> DeleteBrigade(DeleteBrigadeRequest model);
 }
 
 public class ShiftService : IShiftService
@@ -81,6 +82,20 @@ public class ShiftService : IShiftService
         await _context.SaveChangesAsync();
 
         return new EditBrigadeResponse(true);
+    }
+
+    public async Task<DeleteBrigadeResponse> DeleteBrigade(DeleteBrigadeRequest model)
+    {
+        var brigade = await _context.Brigades.Include(x => x.BrigadeUsers).FirstOrDefaultAsync(x => x.Id == model.Id);
+
+        if (brigade == null)
+            return new DeleteBrigadeResponse(false, "Brigade not found");
+
+        _context.BrigadeUsers.RemoveRange(brigade.BrigadeUsers);
+        _context.Brigades.Remove(brigade);
+        await _context.SaveChangesAsync();
+
+        return new DeleteBrigadeResponse(true);
     }
 
 }
