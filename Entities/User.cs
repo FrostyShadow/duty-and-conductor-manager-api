@@ -22,4 +22,5 @@ public class User
 
     public IList<SecurityToken> SecurityTokens {get;set;}
     public IList<Announcement> Announcements {get;set;}
+    public IList<BrigadeUser> BrigadeUsers {get;set;}
 }

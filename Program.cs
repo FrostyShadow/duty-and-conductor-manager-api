@@ -44,6 +44,7 @@ builder.Services.AddTransient<IRoleService, RoleService>();
 builder.Services.AddTransient<IAnnouncementService, AnnouncementService>();
 builder.Services.AddTransient<IVehicleService, VehicleService>();
 builder.Services.AddTransient<ILineService, LineService>();
+builder.Services.AddTransient<IShiftService, ShiftService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
