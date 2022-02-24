@@ -258,7 +258,7 @@ public class VehicleService : IVehicleService
         return new EditVehicleModelResponse(true);
     }
 
-    public async Task<IEnumerable<Set>> GetAllSets() => await _context.Sets.Include(x => x.VehicleSets).ThenInclude(x => x.Vehicle).ToListAsync();
+    public async Task<IEnumerable<Set>> GetAllSets() => await _context.Sets.Include(x => x.VehicleSets).ThenInclude(x => x.Vehicle).ThenInclude(x => x.Model).ThenInclude(x => x.Manufacturer).Include(x => x.VehicleSets).ThenInclude(x => x.Vehicle).ThenInclude(x => x.Model).ThenInclude(x => x.VehicleType).ToListAsync();
 
     public async Task<IEnumerable<VehicleManufacturer>> GetAllVehicleManufacturers() => await _context.VehicleManufacturers.ToListAsync();
 
