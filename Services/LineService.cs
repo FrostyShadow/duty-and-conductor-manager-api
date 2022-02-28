@@ -77,7 +77,7 @@ public class LineService : ILineService
         return new EditLineResponse(true);
     }
 
-    public async Task<IEnumerable<Line>> GetAll() => await _context.Lines.ToListAsync();
+    public async Task<IEnumerable<Line>> GetAll() => await _context.Lines.Include(x => x.LineType).ToListAsync();
 
-    public async Task<Line> GetById(int id) => await _context.Lines.FirstOrDefaultAsync(x => x.Id == id);
+    public async Task<Line> GetById(int id) => await _context.Lines.Include(x => x.LineType).FirstOrDefaultAsync(x => x.Id == id);
 }
