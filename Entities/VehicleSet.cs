@@ -6,6 +6,6 @@ public class VehicleSet
     public int VehicleId {get;set;}
     public int Index {get;set;}
 
-    public Vehicle Vehicle {get;set;}
-    public Set Set {get;set;}
+    public Vehicle? Vehicle {get;set;}
+    public Set? Set {get;set;}
 }
