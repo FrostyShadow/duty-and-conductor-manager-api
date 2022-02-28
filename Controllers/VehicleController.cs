@@ -51,7 +51,7 @@ public class VehicleController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllVehicleManufactuers()
+    public async Task<IActionResult> GetAllVehicleManufacturers()
     {
         var response = await _vehicleService.GetAllVehicleManufacturers();
         return Ok(response);

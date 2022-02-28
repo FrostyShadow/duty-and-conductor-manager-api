@@ -49,7 +49,7 @@ public class VehicleService : IVehicleService
 
     public async Task<AddSetResponse> AddSet(AddSetRequest model)
     {
-        if (!await _context.Sets.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.Ordinal) == 0))
+        if (!await _context.Sets.AnyAsync(x => x.Name == model.Name))
             return new AddSetResponse(false, "Set already exists");
 
         if (!await _context.Vehicles.Where(x => model.Vehicles.Any(y => y.VehicleId == x.Id)).AnyAsync())
@@ -69,7 +69,7 @@ public class VehicleService : IVehicleService
         if (!await _context.VehicleModels.AnyAsync(x => x.Id == model.ModelId))
             return new AddVehicleResponse(false, "Vehicle Model doesn't exist");
 
-        if (!await _context.Vehicles.AnyAsync(x => string.Compare(x.SideNumber, model.SideNumber, StringComparison.OrdinalIgnoreCase) == 0))
+        if (await _context.Vehicles.AnyAsync(x => x.SideNumber == model.SideNumber && x.ModelId == model.ModelId))
             return new AddVehicleResponse(false, "Vehicle already exists");
 
         await _context.Vehicles.AddAsync(new Vehicle
@@ -84,7 +84,7 @@ public class VehicleService : IVehicleService
 
     public async Task<AddVehicleManufacturerResponse> AddVehicleManufacturer(AddVehicleManufacturerRequest model)
     {
-        if (!await _context.VehicleManufacturers.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.OrdinalIgnoreCase) == 0))
+        if (await _context.VehicleManufacturers.AnyAsync(x => x.Name == model.Name))
             return new AddVehicleManufacturerResponse(false, "Manufacturer already exists");
 
         await _context.VehicleManufacturers.AddAsync(new VehicleManufacturer
@@ -103,7 +103,7 @@ public class VehicleService : IVehicleService
         if (!await _context.VehicleTypes.AnyAsync(x => x.Id == model.VehicleTypeId))
             return new AddVehicleModelResponse(false, "Vehicle type doesn't exist");
 
-        if (!await _context.VehicleModels.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.OrdinalIgnoreCase) == 0))
+        if (await _context.VehicleModels.AnyAsync(x => x.Name == model.Name))
             return new AddVehicleModelResponse(false, "Vehicle Model already exists");
 
         await _context.VehicleModels.AddAsync(new VehicleModel
@@ -179,7 +179,7 @@ public class VehicleService : IVehicleService
         if (set == null)
             return new EditSetResponse(false, "Set not found");
 
-        if (await _context.Sets.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.OrdinalIgnoreCase) == 0))
+        if (await _context.Sets.AnyAsync(x => x.Name == model.Name))
             return new EditSetResponse(false, "Set with that name already exists");
 
         var vehicleSets = await _context.VehicleSets.Where(x => x.SetId == model.Id).ToListAsync();
@@ -204,7 +204,7 @@ public class VehicleService : IVehicleService
         if (!await _context.VehicleModels.AnyAsync(x => x.Id == model.ModelId))
             return new EditVehicleResponse(false, "Vehicle model not found");
 
-        if (await _context.Vehicles.AnyAsync(x => string.Compare(x.SideNumber, model.SideNumber, StringComparison.OrdinalIgnoreCase) == 0))
+        if (await _context.Vehicles.AnyAsync(x => x.SideNumber == model.SideNumber))
             return new EditVehicleResponse(false, "Vehicle with that SideNumber already exists");
 
         vehicle.ModelId = model.ModelId;
@@ -222,7 +222,7 @@ public class VehicleService : IVehicleService
         if (manufacturer == null)
             return new EditVehicleManufacturerResponse(false, "Manufacturer not found");
 
-        if (await _context.VehicleManufacturers.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.OrdinalIgnoreCase) == 0))
+        if (await _context.VehicleManufacturers.AnyAsync(x => x.Name == model.Name))
             return new EditVehicleManufacturerResponse(false, "Manufacturer with that name already exists");
 
         manufacturer.Name = model.Name;
@@ -239,7 +239,7 @@ public class VehicleService : IVehicleService
         if (vModel == null)
             return new EditVehicleModelResponse(false, "Vehicle Model not found");
 
-        if (await _context.VehicleModels.AnyAsync(x => string.Compare(x.Name, model.Name, StringComparison.OrdinalIgnoreCase) == 0))
+        if (await _context.VehicleModels.AnyAsync(x => x.Name == model.Name && x.Id != model.Id))
             return new EditVehicleModelResponse(false, "Vehicle Model with that name already exists");
 
         if (!await _context.VehicleTypes.AnyAsync(x => x.Id == model.VehicleTypeId))
