@@ -49,16 +49,16 @@ public class VehicleService : IVehicleService
 
     public async Task<AddSetResponse> AddSet(AddSetRequest model)
     {
-        if (!await _context.Sets.AnyAsync(x => x.Name == model.Name))
+        if (await _context.Sets.AnyAsync(x => x.Name == model.Name))
             return new AddSetResponse(false, "Set already exists");
 
-        if (!await _context.Vehicles.Where(x => model.Vehicles.Any(y => y.VehicleId == x.Id)).AnyAsync())
+        if (!_context.Vehicles.ToList().Where(x => model.Vehicles.Any(y => y.VehicleId == x.Id)).Any())
             return new AddSetResponse(false, "Vehicle doesn't exist");
 
         await _context.Sets.AddAsync(new Set
         {
             Name = model.Name,
-            VehicleSets = model.Vehicles
+            VehicleSets = model.Vehicles.Where(x => x.VehicleId != 0).ToList()
         });
         await _context.SaveChangesAsync();
         return new AddSetResponse(true);
@@ -103,7 +103,7 @@ public class VehicleService : IVehicleService
         if (!await _context.VehicleTypes.AnyAsync(x => x.Id == model.VehicleTypeId))
             return new AddVehicleModelResponse(false, "Vehicle type doesn't exist");
 
-        if (await _context.VehicleModels.AnyAsync(x => x.Name == model.Name))
+        if (await _context.VehicleModels.AnyAsync(x => x.Name == model.Name && x.ManufacturerId == model.ManufacturerId))
             return new AddVehicleModelResponse(false, "Vehicle Model already exists");
 
         await _context.VehicleModels.AddAsync(new VehicleModel

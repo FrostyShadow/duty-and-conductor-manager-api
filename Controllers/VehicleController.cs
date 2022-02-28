@@ -85,7 +85,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -95,7 +95,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -105,7 +105,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -115,7 +115,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -125,7 +125,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -135,7 +135,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -145,7 +145,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -155,7 +155,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -165,7 +165,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -175,7 +175,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -185,7 +185,7 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -195,6 +195,6 @@ public class VehicleController : ControllerBase
 
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 }
