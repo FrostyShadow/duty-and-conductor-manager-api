@@ -28,9 +28,9 @@ public class ShiftService : IShiftService
         _context = context;
     }
 
-    public async Task<Brigade> GetById(int id) => await _context.Brigades.Include(x => x.BrigadeUsers).ThenInclude(x => x.User).FirstOrDefaultAsync(x => x.Id == id);
+    public async Task<Brigade> GetById(int id) => await _context.Brigades.Include(x => x.BrigadeUsers).ThenInclude(x => x.User).Include(x => x.Set).Include(x => x.Line).FirstOrDefaultAsync(x => x.Id == id);
 
-    public async Task<IEnumerable<Brigade>> GetAll() => await _context.Brigades.Include(x => x.BrigadeUsers).ThenInclude(x => x.User).ToListAsync();
+    public async Task<IEnumerable<Brigade>> GetAll() => await _context.Brigades.Include(x => x.BrigadeUsers).ThenInclude(x => x.User).Include(x => x.Set).Include(x => x.Line).ToListAsync();
 
     public async Task<IEnumerable<BrigadeUser>> GetUsersInBrigade(int id) => await _context.BrigadeUsers.Include(x => x.User).Where(x => x.BrigadeId == id).ToListAsync();
 
@@ -114,6 +114,9 @@ public class ShiftService : IShiftService
 
         if (model.IsManager && await _context.BrigadeUsers.AnyAsync(x => x.BrigadeId == model.BrigadeId && x.IsManager))
             return new AddUserToBrigadeResponse(false, "This brigade already has a manager assigned");
+
+        if ((await _context.BrigadeUsers.Where(x => x.BrigadeId == model.BrigadeId).ToListAsync()).Count() >= (await _context.Brigades.FirstAsync(x => x.Id == model.BrigadeId)).ConductorLimit)
+            return new AddUserToBrigadeResponse(false, "This brigade has reached it's user limit");
 
         await _context.BrigadeUsers.AddAsync(new BrigadeUser
         {

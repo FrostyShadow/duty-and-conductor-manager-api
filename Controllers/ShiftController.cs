@@ -47,7 +47,7 @@ public class ShiftController : ControllerBase
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
 
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -58,7 +58,7 @@ public class ShiftController : ControllerBase
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
 
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -69,7 +69,7 @@ public class ShiftController : ControllerBase
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
 
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -80,7 +80,7 @@ public class ShiftController : ControllerBase
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
 
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 
     [HttpPost]
@@ -91,6 +91,6 @@ public class ShiftController : ControllerBase
         if (!response.IsSuccess)
             return BadRequest(new { message = response.ErrorMessage });
 
-        return Ok(response);
+        return Ok(response.IsSuccess);
     }
 }
