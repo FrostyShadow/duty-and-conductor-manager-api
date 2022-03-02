@@ -52,7 +52,8 @@ public class ShiftService : IShiftService
             LineId = model.LineId,
             DateTimeFrom = model.DateTimeFrom,
             DateTimeTo = model.DateTimeTo,
-            ConductorLimit = model.ConductorLimit
+            ConductorLimit = model.ConductorLimit,
+            IsActive = model.IsActive
         });
         await _context.SaveChangesAsync();
 
@@ -81,6 +82,7 @@ public class ShiftService : IShiftService
         brigade.DateTimeFrom = model.DateTimeFrom;
         brigade.DateTimeTo = model.DateTimeTo;
         brigade.ConductorLimit = model.ConductorLimit;
+        brigade.IsActive = model.IsActive;
 
         await _context.SaveChangesAsync();
 
