@@ -1,3 +1,6 @@
+
+using System.Text.Json.Serialization;
+
 namespace DutyAndConductorManager.Api.Entities;
 
 public class Announcement
