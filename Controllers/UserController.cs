@@ -1,11 +1,15 @@
+using DutyAndConductorManager.Api.Entities;
+using DutyAndConductorManager.Api.Helpers;
 using DutyAndConductorManager.Api.Models;
 using DutyAndConductorManager.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DutyAndConductorManager.Api.Controllers;
 
 [ApiController]
 [Route("[controller]/[action]")]
+[Produces("application/json")]
 public class UserController : ControllerBase
 {
     private IUserService _userService;
@@ -16,7 +20,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Authenticate([FromBody] AuthenticateRequest model)
+    [SwaggerOperation("Authenticates user")]
+    [ProducesResponseType(typeof(AuthenticateResponse), 200)]
+    [ProducesResponseType(typeof(ErrorResponse), 400)]
+    public async Task<IActionResult> Authenticate([FromBody, SwaggerRequestBody("Authenticate request data")] AuthenticateRequest model)
     {
         var response = await _userService.Authenticate(model);
 
@@ -27,7 +34,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Activate([FromBody] ActivateRequest model)
+    [SwaggerOperation("Activates user account")]
+    [ProducesResponseType(typeof(Guid), 200)]
+    [ProducesResponseType(typeof(ErrorResponse), 400)]
+    public async Task<IActionResult> Activate([FromBody, SwaggerRequestBody("Activation request data")] ActivateRequest model)
     {
         var response = await _userService.Activate(model);
 
@@ -38,7 +48,9 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest model)
+    [SwaggerOperation("Generates password reset token")]
+    [ProducesResponseType(typeof(bool), 200)]
+    public async Task<IActionResult> ForgotPassword([FromBody, SwaggerRequestBody("User email address")] ForgotPasswordRequest model)
     {
         var response = await _userService.ForgotPassword(model);
 
@@ -46,7 +58,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> PasswordReset([FromBody] PasswordResetRequest model)
+    [SwaggerOperation("Resets password")]
+    [ProducesResponseType(typeof(Guid), 200)]
+    [ProducesResponseType(typeof(ErrorResponse), 400)]
+    public async Task<IActionResult> PasswordReset([FromBody, SwaggerRequestBody("Password reset request data")] PasswordResetRequest model)
     {
         var response = await _userService.PasswordReset(model);
 
@@ -57,7 +72,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> SetPassword([FromBody] SetPasswordRequest model)
+    [SwaggerOperation("Sets password for user")]
+    [ProducesResponseType(typeof(bool), 200)]
+    [ProducesResponseType(typeof(ErrorResponse), 400)]
+    public async Task<IActionResult> SetPassword([FromBody, SwaggerRequestBody("Set password request data")] SetPasswordRequest model)
     {
         var response = await _userService.SetPassword(model);
 
@@ -68,6 +86,8 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation("Gets list of all users")]
+    [ProducesResponseType(typeof(IList<User>), 200)]
     public async Task<IActionResult> GetAll()
     {
         var users = await _userService.GetAll();
@@ -75,14 +95,19 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetById([FromQuery] int id)
+    [SwaggerOperation("Gets user by it's ID")]
+    [ProducesResponseType(typeof(User), 200)]
+    public async Task<IActionResult> GetById([FromQuery, SwaggerParameter("User ID")] int id)
     {
         var user = await _userService.GetByIdAsync(id);
         return Ok(user);
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddUser([FromBody] AddUserRequest model)
+    [SwaggerOperation("Creates new user")]
+    [ProducesResponseType(typeof(AddUserResponse), 200)]
+    [ProducesResponseType(typeof(ErrorResponse), 400)]
+    public async Task<IActionResult> AddUser([FromBody, SwaggerRequestBody("User data")] AddUserRequest model)
     {
         var response = await _userService.AddUser(model);
 
@@ -93,7 +118,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> EditUser([FromBody] EditUserRequest model)
+    [SwaggerOperation("Edits existing user")]
+    [ProducesResponseType(typeof(EditUserResponse), 200)]
+    [ProducesResponseType(typeof(ErrorResponse), 400)]
+    public async Task<IActionResult> EditUser([FromBody, SwaggerRequestBody("User data")] EditUserRequest model)
     {
         var response = await _userService.EditUser(model);
 
@@ -104,7 +132,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> DeleteUser([FromBody] DeleteUserRequest model)
+    [SwaggerOperation("Deletes existing user")]
+    [ProducesResponseType(typeof(DeleteUserResponse), 200)]
+    [ProducesResponseType(typeof(ErrorResponse), 400)]
+    public async Task<IActionResult> DeleteUser([FromBody, SwaggerRequestBody("User ID")] DeleteUserRequest model)
     {
         var response = await _userService.DeleteUser(model);
 

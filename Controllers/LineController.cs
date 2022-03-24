@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using DutyAndConductorManager.Api.Services;
 using DutyAndConductorManager.Api.Models;
+using Swashbuckle.AspNetCore.Annotations;
+using DutyAndConductorManager.Api.Entities;
+using DutyAndConductorManager.Api.Helpers;
 
 namespace DutyAndConductorManager.Api.Controllers;
 
 [ApiController]
 [Route("[controller]/[action]")]
+[Produces("application/json")]
 public class LineController : ControllerBase
 {
     private readonly ILineService _lineService;
@@ -16,7 +20,9 @@ public class LineController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetById([FromQuery] int id)
+    [SwaggerOperation("Gets line by it's ID")]
+    [ProducesResponseType(typeof(Line), 200)]
+    public async Task<IActionResult> GetById([FromQuery, SwaggerParameter("Line ID")] int id)
     {
         var response = await _lineService.GetById(id);
 
@@ -24,6 +30,8 @@ public class LineController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation("Gets list of all lines")]
+    [ProducesResponseType(typeof(IList<Line>), 200)]
     public async Task<IActionResult> GetAll()
     {
         var response = await _lineService.GetAll();
@@ -32,7 +40,10 @@ public class LineController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddLine([FromBody] AddLineRequest model)
+    [SwaggerOperation("Creates new line")]
+    [ProducesResponseType(typeof(bool), 200)]
+    [ProducesResponseType(typeof(ErrorResponse), 400)]
+    public async Task<IActionResult> AddLine([FromBody, SwaggerRequestBody("Line data")] AddLineRequest model)
     {
         var response = await _lineService.AddLine(model);
 
@@ -43,7 +54,10 @@ public class LineController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> EditLine([FromBody] EditLineRequest model)
+    [SwaggerOperation("Edits existing line")]
+    [ProducesResponseType(typeof(bool), 200)]
+    [ProducesResponseType(typeof(ErrorResponse), 400)]
+    public async Task<IActionResult> EditLine([FromBody, SwaggerRequestBody("Line data")] EditLineRequest model)
     {
         var response = await _lineService.EditLine(model);
 
@@ -54,7 +68,10 @@ public class LineController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> DeleteLine([FromBody] DeleteLineRequest model)
+    [SwaggerOperation("Deletes existing line")]
+    [ProducesResponseType(typeof(bool), 200)]
+    [ProducesResponseType(typeof(ErrorResponse), 400)]
+    public async Task<IActionResult> DeleteLine([FromBody, SwaggerRequestBody("Line ID")] DeleteLineRequest model)
     {
         var response = await _lineService.DeleteLine(model);
 

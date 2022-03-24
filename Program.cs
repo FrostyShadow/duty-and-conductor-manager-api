@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,9 @@ builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializ
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "Duty and Conductor Manager Api", Version = "v1" });
+    c.SwaggerDoc("v1", new() { Title = "Conductor Duty Manager API", Version = "v1" });
+    c.EnableAnnotations();
+    c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
 });
 builder.Services.AddDbContext<ConductorDb>(config =>
 {
@@ -51,7 +54,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Duty and Conductor Manager Api v1"));
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Conductor Duty Manager API v1"));
 }
 
 app.UseSerilogRequestLogging();
